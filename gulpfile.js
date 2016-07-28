@@ -1,5 +1,5 @@
 var elixir = require('laravel-elixir');
-
+process.env.DISABLE_NOTIFIER = true
 /*
  |--------------------------------------------------------------------------
  | Elixir Asset Management
@@ -12,5 +12,12 @@ var elixir = require('laravel-elixir');
  */
 
 elixir(function(mix) {
-    mix.sass('app.scss');
+    mix.less('app.less');
+    // mix.less('font-awesome.less');
+    mix.copy('public/assets/fonts/FontAwesome.otf', 'public/fonts');
+    mix.scripts([
+    	'vendor/intlTelInput.js',
+    	'vendor/intlTelUtils.js',
+    	'app.js'
+    	],'public/js/scripts.min.js');
 });

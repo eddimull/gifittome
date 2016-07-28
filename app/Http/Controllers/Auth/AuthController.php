@@ -7,7 +7,9 @@ use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
-
+use App\Classes\smsCommand;
+use App\Http\Controllers\SMS;
+use Auth;
 class AuthController extends Controller
 {
     /*
@@ -41,8 +43,12 @@ class AuthController extends Controller
      */
     protected function validator(array $data)
     {
+        //has to strip out the javascript added characters
+        $data['phone'] = str_replace(['(',')',' ','-'],"",$data['phone']);
+
         return Validator::make($data, [
             'name' => 'required|max:255',
+            'phone' => 'required|numeric',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|confirmed|min:6',
         ]);
@@ -56,10 +62,24 @@ class AuthController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+
+         //has to strip out the javascript added characters
+        $data['phone'] = str_replace(['(',')',' ','-'],"",$data['phone']);
+        
+        
+        $user = User::create([
             'name' => $data['name'],
+            'phoneNumber' => '+1' . $data['phone'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
+            'verified' => false
         ]);
+
+
+        $command = new smsCommand(null,$user);
+        $command->verifyPhoneNumberSend();
+
+        return $user;
+
     }
 }
